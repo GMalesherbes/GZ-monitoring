@@ -2224,11 +2224,14 @@
     /* --- Config Firebase (laisser vide => mode local). Peut aussi être collée
            dans l'app via le bouton Partage, ou intégrée ici lors de la livraison. */
     const FIREBASE_CONFIG = {
-      // Colle ici la config web de TON projet Firebase (voir README.md) pour que
-      // le partage temps reel soit actif directement a l'ouverture de la page,
-      // pour tout le monde. Laisser vide : chacun peut quand meme activer le
-      // partage depuis le bouton "Partage" de l'app (config alors stockee
-      // uniquement dans son propre navigateur).
+      apiKey: "AIzaSyDVsG_wUiKAq5RiLVRGKl1_NUWyiFAd5Us",
+      authDomain: "gz-monitoring.firebaseapp.com",
+      databaseURL: "https://gz-monitoring-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "gz-monitoring",
+      storageBucket: "gz-monitoring.firebasestorage.app",
+      messagingSenderId: "1094115802077",
+      appId: "1:1094115802077:web:ee54baeb43d5cd2578d434",
+      measurementId: "G-F0PZV9PP92"
     };
     const SHARED_DOC = "roadmaps/mon-espace";
     const LS_DATA = "suivi_roadmap_v1";
@@ -2239,7 +2242,7 @@
     // et colle le hash obtenu ci-dessous a la place de la valeur actuelle.
     const CODE_HASH = "15b98cd2";
     function hashCode(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ("0000000" + h.toString(16)).slice(-8); }
-    const APP_TITLE = "Suivi de projets";
+    const APP_TITLE = "Monitoring GZ";
     const APP_SUBTITLE = "Feuille de route";
     const APP_LOGO = "S";
 
