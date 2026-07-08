@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monitoring GZ</title>
+  <title>Suivi de projets</title>
   <style>
     :root {
       color-scheme: light;
@@ -1971,6 +1971,10 @@
       color: #8A93A3;
       font-weight: 700
     }
+
+    body.readonly #btnAdd, body.readonly #btnManage, body.readonly #btnMenu, body.readonly .quickbar, body.readonly .slider, body.readonly #evSave, body.readonly #evDelete {
+      display: none !important
+    }
   </style>
 </head>
 
@@ -1979,7 +1983,7 @@
 
     <div class="appbar">
       <div class="brand">
-        <h1><span class="logo" id="appLogo">S</span> <span id="appTitle">Monitoring GZ</span></h1>
+        <h1><span class="logo" id="appLogo">S</span> <span id="appTitle">Suivi de projets</span></h1>
         <span class="sub" id="appSub">Feuille de route</span>
       </div>
       <div class="spacer"></div>
@@ -2237,11 +2241,16 @@
     const LS_DATA = "suivi_roadmap_v1";
     const LS_FBCFG = "suivi_fb_cfg";
     let ACCESS_CODE = "";
-    // Mot de passe par defaut : change-moi-2026
-    // Pour le changer : ouvre generer-code-acces.html, tape ton nouveau code,
-    // et colle le hash obtenu ci-dessous a la place de la valeur actuelle.
+    let READ_ONLY = false;
+    // Code d'edition (toi). Pour le changer : ouvre generer-code-acces.html,
+    // section "Code d'edition", et colle le hash obtenu ci-dessous.
     const CODE_HASH = "15b98cd2";
+    // Code de lecture seule (ton n+1, ou toute personne qui doit seulement
+    // consulter). Par defaut : lecture-2026. Change-le via generer-code-acces.html,
+    // section "Code de lecture seule". Laisser "" desactive ce second acces.
+    const CODE_HASH_VIEW = "be47fffe";
     function hashCode(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ("0000000" + h.toString(16)).slice(-8); }
+    function checkCode(v) { const h = hashCode(v); if (h === CODE_HASH) { READ_ONLY = false; return true; } if (CODE_HASH_VIEW && h === CODE_HASH_VIEW) { READ_ONLY = true; return true; } return false; }
     const APP_TITLE = "Monitoring GZ";
     const APP_SUBTITLE = "Feuille de route";
     const APP_LOGO = "S";
@@ -2276,7 +2285,18 @@
       TAG_DEFS = []; SPECIAL_COLORS = {};
       (state.projects || []).forEach(p => TAG_DEFS.push({ n: p.name, parent: p.name, cat: "parent" }));
       (state.tags || []).forEach(t => { const pn = t.projectId ? ((state.projects.find(p => p.id === t.projectId) || {}).name || null) : null; TAG_DEFS.push({ n: t.name, parent: pn, cat: t.cat || (pn ? "sub" : "standalone") }); if (t.color) SPECIAL_COLORS[t.name] = t.color; });
-      CAT_LABELS = { parent: "Projets", verticale: "Verticales", transverse: "Transverses", standalone: "Autres tags", custom: "Personnalises" };
+      CAT_LABELS = { parent: "Projets", societe: "Sociétés", domaine: "Domaines", verticale: "Verticales", transverse: "Transverses", standalone: "Autres tags", custom: "Personnalises" };
+    }
+    /* Pré-remplit une fois les tags "Société" et "Domaine" propres à cet espace de
+       travail (n'écrase jamais un tag déjà existant du même nom). */
+    function bootstrapCategories() {
+      if (READ_ONLY) return;
+      const existing = new Set((state.tags || []).map(t => t.name.toLowerCase()));
+      let changed = false;
+      const add = (n, c, cat) => { if (!existing.has(n.toLowerCase())) { state.tags.push({ name: n, projectId: null, color: c, cat }); existing.add(n.toLowerCase()); changed = true; } };
+      [["Groupe Malesherbes", "#1E2430"], ["Adonys", "#0E9F6E"], ["Triactis", "#B8923E"]].forEach(([n, c]) => add(n, c, "societe"));
+      [["Développement web", "#2563EB"], ["Référencement web", "#7C3AED"], ["Téléphonie d'entreprise", "#0E9F6E"], ["Intelligence artificielle", "#B8923E"], ["Administratif", "#64748B"], ["Support informatique", "#D97706"]].forEach(([n, c]) => add(n, c, "domaine"));
+      if (changed) { rebuildTaxonomy(); persist({ silent: true }); renderAll(); }
     }
     const state = { events: [], projects: [], tags: [], view: "focus", filters: new Set(), preset: "", search: "", group: "projet", filtersOpen: false, collapsed: {}, savedViews: [], mode: "local", dirtyUntil: 0 };
 
@@ -2330,10 +2350,14 @@
     function showToast(msg) { const t = $("#toast"); $("#toastTxt").textContent = msg || "Enregistré"; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 1400); }
     function setStorageUI() {
       const dot = $("#storageDot"), txt = $("#storageTxt");
-      if (state.mode === "shared") { dot.className = "dot live"; txt.textContent = "Partagé en temps réel"; $("#storagePill").title = "Synchronisé pour toute l'équipe"; }
-      else { dot.className = "dot local"; txt.textContent = "Local (ce poste)"; $("#storagePill").title = "Sauvegarde sur cet appareil. Active le partage pour l'équipe."; }
+      const ro = READ_ONLY ? " · lecture seule" : "";
+      if (state.mode === "shared") { dot.className = "dot live"; txt.textContent = "Partagé en temps réel" + ro; $("#storagePill").title = "Synchronisé pour toute l'équipe"; }
+      else { dot.className = "dot local"; txt.textContent = "Local (ce poste)" + ro; $("#storagePill").title = "Sauvegarde sur cet appareil. Active le partage pour l'équipe."; }
     }
+    function applyReadOnlyLock() { document.body.classList.add("readonly"); }
+    function applyBranding() { document.title = APP_TITLE; const lg = $("#appLogo"), tt = $("#appTitle"), sb = $("#appSub"); if (lg) lg.textContent = APP_LOGO; if (tt) tt.textContent = APP_TITLE; if (sb) sb.textContent = APP_SUBTITLE; }
     function persist(opts) {
+      if (READ_ONLY) { showToast("Lecture seule : rien n'est enregistré"); return; }
       opts = opts || {};
       if (state.mode === "shared" && fbDoc) {
         state.dirtyUntil = Date.now() + 1500;
@@ -2441,9 +2465,11 @@
         const grp = (label, tags) => { tags = tags.filter(t => t.cat === "parent" || used.has(t.n) || state.filters.has(t.n)); if (!tags.length) return; html += `<div class="fb-grp"><span class="gl">${esc(label)}</span>` + tags.map(fbtag).join("") + `</div>`; };
         grp("Projets", known.filter(t => t.cat === "parent"));
         state.projects.forEach(pp => grp(pp.name, known.filter(t => t.cat !== "parent" && t.parent === pp.name)));
+        grp("Sociétés", known.filter(t => t.cat === "societe"));
+        grp("Domaines", known.filter(t => t.cat === "domaine"));
         grp("Verticales", known.filter(t => t.cat === "verticale"));
         grp("Transverses", known.filter(t => t.cat === "transverse"));
-        grp("Autres tags", known.filter(t => !t.parent && !["verticale", "transverse", "parent"].includes(t.cat)));
+        grp("Autres tags", known.filter(t => !t.parent && !["verticale", "transverse", "parent", "societe", "domaine"].includes(t.cat)));
         html += `</div>`;
       }
       if (state.filters.size || state.search || state.preset) html += `<div class="fb-actions"><button class="linklike" id="clearFilters">✕ Réinitialiser</button><span class="muted" style="font-size:12px">${visibleEvents().length} / ${state.events.length} affichés</span></div>`;
@@ -3105,22 +3131,36 @@
     }
 
     /* ---- Gestion projets & tags (editable depuis le site, synchronise) ---- */
-    function commitTax(all) { rebuildTaxonomy(); persist(); renderManage(); if (all) renderAll(); else renderOverview(); }
+    function commitTax(all) { if (READ_ONLY) { showToast("Lecture seule : rien n'est enregistré"); return; } rebuildTaxonomy(); persist(); renderManage(); if (all) renderAll(); else renderOverview(); }
     function renameTagEverywhere(o, nv) { state.events.forEach(ev => { ev.tags = (ev.tags || []).map(x => x === o ? nv : x); }); }
     function addProjectMg() { const n = $("#mgPName").value.trim(); if (!n) return; if (state.projects.some(p => p.name.toLowerCase() === n.toLowerCase())) { alert("Ce projet existe déjà."); return; } state.projects.push({ id: slugifyId(n) + "-" + Math.random().toString(36).slice(2, 5), name: n, color: $("#mgPColor").value, short: (n.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "P").toUpperCase(), order: state.projects.length }); $("#mgPName").value = ""; commitTax(true); }
-    function addTagMg() { const n = $("#mgTName").value.trim(); if (!n) return; if (state.tags.some(t => t.name.toLowerCase() === n.toLowerCase())) { alert("Ce tag existe déjà."); return; } const pid = $("#mgTProj").value || null; state.tags.push({ name: n, projectId: pid, color: pid ? null : $("#mgTColor").value, cat: pid ? "sub" : "standalone" }); $("#mgTName").value = ""; commitTax(true); }
+    function addTagMg() {
+      const n = $("#mgTName").value.trim(); if (!n) return; if (state.tags.some(t => t.name.toLowerCase() === n.toLowerCase())) { alert("Ce tag existe déjà."); return; }
+      const raw = $("#mgTProj").value || ""; let pid = null, cat = "standalone";
+      if (raw.startsWith("cat:")) { cat = raw.slice(4); } else if (raw) { pid = raw; cat = "sub"; }
+      state.tags.push({ name: n, projectId: pid, color: pid ? null : $("#mgTColor").value, cat }); $("#mgTName").value = ""; commitTax(true);
+    }
+    const MG_CATS = [["societe", "Société"], ["domaine", "Domaine"], ["verticale", "Verticale"], ["transverse", "Transverse"]];
+    function catOptionsHtml(t) {
+      const projSel = t ? t.projectId : null, curCat = t ? t.cat : null;
+      const noneSel = !projSel && !MG_CATS.some(([k]) => k === curCat);
+      let html = `<option value=""${noneSel ? " selected" : ""}>(aucun projet)</option>`;
+      if (state.projects.length) html += `<optgroup label="Projet">` + state.projects.map(p => `<option value="${esc(p.id)}"${projSel === p.id ? " selected" : ""}>${esc(p.name)}</option>`).join("") + `</optgroup>`;
+      html += `<optgroup label="Catégorie">` + MG_CATS.map(([k, l]) => `<option value="cat:${k}"${(!projSel && curCat === k) ? " selected" : ""}>${l}</option>`).join("") + `</optgroup>`;
+      return html;
+    }
     function renderManage() {
       let ph = "";
       state.projects.forEach(p => { ph += `<div class="mg-row" data-pid="${esc(p.id)}"><input type="color" class="mg-color mg-pcolor" value="${esc(p.color)}"><input class="mg-name mg-pname" value="${esc(p.name)}"><button class="mg-del mg-pdel">Supprimer</button></div>`; });
       $("#mgProjects").innerHTML = ph || `<div class="muted" style="font-size:12.5px">Aucun projet pour l'instant.</div>`;
       let th = "";
       state.tags.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(t => {
-        const opts = `<option value="">(aucun projet)</option>` + state.projects.map(p => `<option value="${esc(p.id)}"${t.projectId === p.id ? " selected" : ""}>${esc(p.name)}</option>`).join("");
+        const opts = catOptionsHtml(t);
         const col = tagColor(t.name);
-        th += `<div class="mg-row" data-tag="${esc(t.name)}"><span class="mg-sq" style="background:${col}"></span><input class="mg-name mg-tname" value="${esc(t.name)}"><select class="mg-name mg-tproj" style="flex:0 0 auto;width:150px">${opts}</select><button class="mg-del mg-tdel">Supprimer</button></div>`;
+        th += `<div class="mg-row" data-tag="${esc(t.name)}"><span class="mg-sq" style="background:${col}"></span><input class="mg-name mg-tname" value="${esc(t.name)}"><select class="mg-name mg-tproj" style="flex:0 0 auto;width:170px">${opts}</select><button class="mg-del mg-tdel">Supprimer</button></div>`;
       });
       $("#mgTags").innerHTML = th || `<div class="muted" style="font-size:12.5px">Aucun tag.</div>`;
-      $("#mgTProj").innerHTML = `<option value="">(aucun projet)</option>` + state.projects.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+      $("#mgTProj").innerHTML = catOptionsHtml(null);
       $$("#mgProjects .mg-row").forEach(row => {
         const pid = row.dataset.pid;
         row.querySelector(".mg-pname").onchange = e => { const p = state.projects.find(x => x.id === pid); if (p) p.name = e.target.value.trim() || p.name; commitTax(true); };
@@ -3130,29 +3170,34 @@
       $$("#mgTags .mg-row").forEach(row => {
         const nm = row.dataset.tag;
         row.querySelector(".mg-tname").onchange = e => { const nv = e.target.value.trim(); if (!nv) return; const t = state.tags.find(x => x.name === nm); if (t && nv !== nm) { renameTagEverywhere(t.name, nv); t.name = nv; } commitTax(true); };
-        row.querySelector(".mg-tproj").onchange = e => { const t = state.tags.find(x => x.name === nm); if (t) { t.projectId = e.target.value || null; if (t.projectId) { t.color = null; t.cat = "sub"; } else { t.cat = "standalone"; if (!t.color) t.color = "#9A6A3A"; } } commitTax(true); };
+        row.querySelector(".mg-tproj").onchange = e => { const t = state.tags.find(x => x.name === nm); if (t) { const raw = e.target.value || ""; if (raw.startsWith("cat:")) { t.projectId = null; t.cat = raw.slice(4); if (!t.color) t.color = "#9A6A3A"; } else if (raw) { t.projectId = raw; t.color = null; t.cat = "sub"; } else { t.projectId = null; t.cat = "standalone"; if (!t.color) t.color = "#9A6A3A"; } } commitTax(true); };
         row.querySelector(".mg-tdel").onclick = () => { if (!confirm("Supprimer le tag « " + nm + " » ? Il sera retiré des événements.")) return; state.tags = state.tags.filter(x => x.name !== nm); state.events.forEach(ev => ev.tags = (ev.tags || []).filter(x => x !== nm)); commitTax(true); };
       });
     }
-    function start() {
+    async function start() {
       const saved = localLoad();
       state.events = (saved && saved.events && saved.events.length) ? saved.events : SEED.map(e => Object.assign({}, e));
       if (saved && Array.isArray(saved.projects) && saved.projects.length) { state.projects = saved.projects; state.tags = Array.isArray(saved.tags) ? saved.tags : []; }
       else { seedTaxonomy(); }
       rebuildTaxonomy();
+      applyBranding();
+      if (READ_ONLY) applyReadOnlyLock();
       setStorageUI(); wire(); renderAll();
-      tryStartFirebase();
+      await tryStartFirebase();
+      // N'ajoute Société/Domaine qu'une fois les données distantes (le cas
+      // échéant) chargées, pour ne pas se faire écraser par la synchro.
+      bootstrapCategories();
     }
     function gate() {
       ACCESS_CODE = localStorage.getItem("suivi_access_code") || "";
-      if (ACCESS_CODE && hashCode(ACCESS_CODE) === CODE_HASH) { start(); return; }
+      if (ACCESS_CODE && checkCode(ACCESS_CODE)) { start(); return; }
       const ov = document.createElement("div");
       ov.id = "gateScrim";
       ov.style.cssText = "position:fixed;inset:0;z-index:200;background:#FAF8F3;display:flex;align-items:center;justify-content:center;padding:20px";
       ov.innerHTML = '<div style="max-width:380px;width:100%;background:#fff;border:1px solid #E9E3D6;border-radius:16px;box-shadow:0 10px 40px rgba(30,36,48,.12);padding:28px;text-align:center"><div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#2A3140,#1E2430);color:#E9CF8E;display:grid;place-items:center;font-weight:800;font-size:18px;margin:0 auto 14px">' + APP_LOGO + '</div><h2 style="font-size:18px;margin:0 0 5px;color:#1E2430">' + APP_TITLE + '</h2><div style="font-size:13px;color:#6B7280;margin-bottom:18px">Acc\u00e8s r\u00e9serv\u00e9. Entre le code d\'acc\u00e8s.</div><input id="gateInput" type="password" placeholder="Code d\'acc\u00e8s" autocomplete="off" style="width:100%;height:42px;padding:0 14px;border:1px solid #E9E3D6;border-radius:10px;background:#FCFBF8;font-size:15px;text-align:center;letter-spacing:.03em;color:#1E2430"><div id="gateErr" style="color:#DC2626;font-size:12.5px;height:16px;margin:8px 0"></div><button id="gateBtn" style="width:100%;height:42px;border:none;border-radius:10px;background:linear-gradient(180deg,#C8A24A,#B8923E);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Entrer</button><label style="display:flex;align-items:center;gap:7px;justify-content:center;margin-top:13px;font-size:12px;color:#6B7280;cursor:pointer"><input type="checkbox" id="gateRemember" checked> Se souvenir sur cet appareil</label></div>';
       document.body.appendChild(ov);
       const inp = ov.querySelector("#gateInput"), btn = ov.querySelector("#gateBtn"), err = ov.querySelector("#gateErr");
-      function submit() { const v = inp.value.trim(); if (hashCode(v) === CODE_HASH) { ACCESS_CODE = v; if (ov.querySelector("#gateRemember").checked) localStorage.setItem("suivi_access_code", v); ov.remove(); start(); } else { err.textContent = "Code incorrect."; inp.value = ""; inp.focus(); } }
+      function submit() { const v = inp.value.trim(); if (checkCode(v)) { ACCESS_CODE = v; if (ov.querySelector("#gateRemember").checked) localStorage.setItem("suivi_access_code", v); ov.remove(); start(); } else { err.textContent = "Code incorrect."; inp.value = ""; inp.focus(); } }
       btn.onclick = submit; inp.onkeydown = e => { if (e.key === "Enter") submit(); };
       setTimeout(() => inp.focus(), 60);
     }
