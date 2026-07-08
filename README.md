@@ -97,6 +97,24 @@ Le moyen le plus simple est de dupliquer `index.html` et de lui donner, dans la 
 - Sans Firebase, aucune donnée ne quitte le navigateur : c'est le mode le plus simple et le plus étanche, mais sans partage automatique.
 - Il n'y a pas de gestion de comptes utilisateurs ni de journal de qui a modifié quoi : c'est un outil léger, pas un outil de gouvernance de données sensibles.
 
+## 9. Couleurs de marque et sociétés
+
+Les couleurs de l'outil (bouton principal, logo, anneaux de progression) reprennent le violet de Groupe Malesherbes (`#552F91`) et le texte utilise `#323232`. Les tags Société ont chacun leur couleur (Groupe Malesherbes, Triactis, Adonys, Européenne d'Assurance) ; comme Triactis et Adonys partageaient la même couleur de marque, Adonys a été légèrement assombrie pour rester distinguable dans les filtres.
+
+Un fichier `patch-couleurs-societes-*.json` est fourni pour mettre à jour les couleurs des tags Société déjà créés dans ton espace (l'auto-remplissage ne s'exécute qu'une seule fois et ne les aurait pas mis à jour tout seul). À importer une fois via « ⋯ » puis « Importer ».
+
+Chaque tag (Société, Domaine ou autre) peut désormais aussi avoir sa couleur changée directement dans « Gérer », pas seulement son nom.
+
+## 10. Sélection multiple
+
+Une case à cocher apparaît sur chaque tâche dans les vues Focus et Projets. Cocher une ou plusieurs tâches fait apparaître une barre d'actions en bas de l'écran : changer le statut de toutes les tâches sélectionnées en une fois, ou les supprimer en masse. Cette fonctionnalité est désactivée en lecture seule, comme les autres actions d'édition.
+
+## 11. Bornage temporel et statut Archivé
+
+Une ligne « Période » dans le bandeau de filtres permet de borner l'affichage des tâches et l'avancement global : Aujourd'hui, Cette semaine, Ce mois-ci, 30 derniers jours, Année en cours, Année N-1, ou Personnalisé (deux dates). Un second choix permet de filtrer sur la date de début ou la date de fin des tâches. Par défaut, aucun bornage n'est actif et tout s'affiche.
+
+Un statut « Archivé » est disponible (dans la fiche d'une tâche, ou en masse via la sélection multiple). Une tâche archivée reste dans les données mais disparaît de toutes les vues, de l'avancement global et des calculs, comme si elle n'existait plus. Pour la retrouver ou la désarchiver, utilise le filtre « Archivées » dans le bandeau de filtres.
+
 ## Sources
 
 - [Configuring a publishing source for your GitHub Pages site (GitHub Docs)](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)

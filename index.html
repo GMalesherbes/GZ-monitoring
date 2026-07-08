@@ -9,15 +9,15 @@
       color-scheme: light;
       --bg: #FAF8F3;
       --panel: #FFFFFF;
-      --ink: #1E2430;
+      --ink: #323232;
       --muted: #6B7280;
       --faint: #9AA1AC;
       --line: #E9E3D6;
       --line2: #F0ECE2;
-      --shadow: 0 1px 3px rgba(30, 36, 48, .06), 0 6px 24px rgba(30, 36, 48, .05);
-      --gold: #B8923E;
-      --gold-dk: #9A7A2E;
-      --gold-sf: #F6EFDD;
+      --shadow: 0 1px 3px rgba(50, 50, 50, .06), 0 6px 24px rgba(50, 50, 50, .05);
+      --gold: #552F91;
+      --gold-dk: #392166;
+      --gold-sf: #EFEAF8;
       --p1: #2563EB;
       --p1l: #E3EAFE;
       --p1d: #1E40AF;
@@ -118,14 +118,14 @@
       width: 26px;
       height: 26px;
       border-radius: 7px;
-      background: linear-gradient(135deg, #2A3140, #1E2430);
-      color: #E9CF8E;
+      background: linear-gradient(135deg, #6C4EA2, #552F91);
+      color: #FFFFFF;
       display: grid;
       place-items: center;
       font-weight: 800;
       font-size: 13px;
       letter-spacing: .02em;
-      box-shadow: inset 0 0 0 1px rgba(233, 207, 142, .25)
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25)
     }
 
     .brand .sub {
@@ -208,10 +208,10 @@
     }
 
     .btn.gold {
-      background: linear-gradient(180deg, #C8A24A, #B8923E);
+      background: linear-gradient(180deg, #6C4EA2, #552F91);
       color: #fff;
-      border-color: #A8842F;
-      box-shadow: 0 1px 2px rgba(184, 146, 62, .4), 0 8px 20px rgba(184, 146, 62, .22);
+      border-color: #432570;
+      box-shadow: 0 1px 2px rgba(85, 47, 145, .4), 0 8px 20px rgba(85, 47, 145, .22);
       font-weight: 700
     }
 
@@ -458,7 +458,7 @@
       display: block;
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #3A4254, #1E2430)
+      background: linear-gradient(90deg, #4A4A4A, #323232)
     }
 
     .mpct {
@@ -476,7 +476,7 @@
 
     .row {
       display: grid;
-      grid-template-columns: 22px 1fr 250px;
+      grid-template-columns: 18px 22px 1fr 250px;
       gap: 12px;
       align-items: center;
       background: var(--panel);
@@ -486,6 +486,66 @@
       padding: 9px 13px;
       box-shadow: var(--shadow);
       transition: .12s
+    }
+
+    .row.rowsel {
+      box-shadow: 0 0 0 2px var(--gold) inset, var(--shadow);
+      background: var(--gold-sf)
+    }
+
+    .rowchk {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--gold)
+    }
+
+    .bulkbar {
+      position: fixed;
+      left: 50%;
+      bottom: 78px;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .3);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 65;
+      font-size: 13px
+    }
+
+    .bulkbar[hidden] {
+      display: none
+    }
+
+    .bulkbar .bk-count {
+      font-weight: 700;
+      padding-right: 6px;
+      white-space: nowrap
+    }
+
+    .bulkbar select, .bulkbar button {
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, .25);
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 0 10px;
+      cursor: pointer
+    }
+
+    .bulkbar button.bk-del {
+      background: var(--bad);
+      border-color: var(--bad)
+    }
+
+    .bulkbar button.bk-cancel {
+      background: transparent
     }
 
     .row:hover {
@@ -1368,7 +1428,7 @@
       }
 
       .row {
-        grid-template-columns: 22px 1fr;
+        grid-template-columns: 18px 22px 1fr;
       }
 
       .row .ctrl {
@@ -1972,7 +2032,7 @@
       font-weight: 700
     }
 
-    body.readonly #btnAdd, body.readonly #btnManage, body.readonly #btnMenu, body.readonly .quickbar, body.readonly .slider, body.readonly #evSave, body.readonly #evDelete {
+    body.readonly #btnAdd, body.readonly #btnManage, body.readonly #btnMenu, body.readonly .quickbar, body.readonly .slider, body.readonly #evSave, body.readonly #evDelete, body.readonly .rowchk, body.readonly .bulkbar {
       display: none !important
     }
   </style>
@@ -2034,6 +2094,8 @@
     <div id="view"></div>
   </div>
 
+  <div class="bulkbar" id="bulkbar" hidden></div>
+
   <!-- Event modal -->
   <div class="scrim" id="evScrim">
     <div class="modal" role="dialog" aria-modal="true">
@@ -2090,6 +2152,7 @@
             <button class="opt" data-s="en-cours" aria-pressed="false">En cours</button>
             <button class="opt" data-s="termine" aria-pressed="false">Terminé</button>
             <button class="opt" data-s="bloque" aria-pressed="false">Bloqué</button>
+            <button class="opt" data-s="archive" aria-pressed="false">Archivé</button>
           </div>
         </div>
         <div class="field">
@@ -2294,11 +2357,11 @@
       const existing = new Set((state.tags || []).map(t => t.name.toLowerCase()));
       let changed = false;
       const add = (n, c, cat) => { if (!existing.has(n.toLowerCase())) { state.tags.push({ name: n, projectId: null, color: c, cat }); existing.add(n.toLowerCase()); changed = true; } };
-      [["Groupe Malesherbes", "#1E2430"], ["Adonys", "#0E9F6E"], ["Triactis", "#B8923E"]].forEach(([n, c]) => add(n, c, "societe"));
+      [["Groupe Malesherbes", "#552F91"], ["Adonys", "#8C6E3A"], ["Triactis", "#BEA050"], ["Européenne d'Assurance", "#004A91"]].forEach(([n, c]) => add(n, c, "societe"));
       [["Développement web", "#2563EB"], ["Référencement web", "#7C3AED"], ["Téléphonie d'entreprise", "#0E9F6E"], ["Intelligence artificielle", "#B8923E"], ["Administratif", "#64748B"], ["Support informatique", "#D97706"]].forEach(([n, c]) => add(n, c, "domaine"));
       if (changed) { rebuildTaxonomy(); persist({ silent: true }); renderAll(); }
     }
-    const state = { events: [], projects: [], tags: [], view: "focus", filters: new Set(), preset: "", search: "", group: "projet", filtersOpen: false, collapsed: {}, savedViews: [], mode: "local", dirtyUntil: 0 };
+    const state = { events: [], projects: [], tags: [], view: "focus", filters: new Set(), preset: "", search: "", group: "projet", filtersOpen: false, collapsed: {}, savedViews: [], mode: "local", dirtyUntil: 0, selected: new Set(), dateFilter: { preset: "", field: "start", from: "", to: "" } };
 
     /* --------------------------- Utilitaires --------------------------------- */
     const $ = (s, r = document) => r.querySelector(s);
@@ -2407,11 +2470,32 @@
     /* =======================================================================
        RENDU
        ======================================================================= */
+    /* ---- Bornage temporel (préréglages + personnalisé) ---- */
+    function mondayOf(d) { const x = new Date(d); const day = x.getDay(); x.setDate(x.getDate() + (day === 0 ? -6 : 1 - day)); return x; }
+    function dateRangeBounds() {
+      const p = state.dateFilter.preset; if (!p) return null;
+      const y = TODAY.getFullYear();
+      if (p === "today") return [TODAY_ISO, TODAY_ISO];
+      if (p === "week") { const mon = mondayOf(TODAY); const sun = new Date(mon); sun.setDate(mon.getDate() + 6); return [toISO(mon), toISO(sun)]; }
+      if (p === "month") { const f = new Date(y, TODAY.getMonth(), 1); const t = new Date(y, TODAY.getMonth() + 1, 0); return [toISO(f), toISO(t)]; }
+      if (p === "30d") { const f = new Date(TODAY); f.setDate(f.getDate() - 29); return [toISO(f), TODAY_ISO]; }
+      if (p === "ytd") return [y + "-01-01", y + "-12-31"];
+      if (p === "lastyear") return [(y - 1) + "-01-01", (y - 1) + "-12-31"];
+      if (p === "custom") { if (!state.dateFilter.from && !state.dateFilter.to) return null; return [state.dateFilter.from || "0000-01-01", state.dateFilter.to || "9999-12-31"]; }
+      return null;
+    }
+    function inDateRange(e) {
+      const b = dateRangeBounds(); if (!b) return true;
+      const field = state.dateFilter.field === "end" ? (e.end || e.start) : e.start;
+      return !!field && field >= b[0] && field <= b[1];
+    }
     function visibleEvents() {
       let l = state.events.slice();
+      l = state.preset === "archive" ? l.filter(isArchived) : l.filter(e => !isArchived(e));
       if (state.filters.size) l = l.filter(e => (e.tags || []).some(t => state.filters.has(t)));
       const q = deburr(state.search || "");
       if (q) l = l.filter(e => deburr(e.title).includes(q) || (e.tags || []).some(t => deburr(t).includes(q)));
+      l = l.filter(inDateRange);
       const pr = state.preset;
       if (pr === "en-cours") l = l.filter(e => statusKey(e) === "en-cours");
       else if (pr === "bloque") l = l.filter(e => statusKey(e) === "bloque");
@@ -2429,15 +2513,15 @@
       return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
     <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="#EDEAE0" stroke-width="${stroke}"/>
     <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/>
-    <text x="${size / 2}" y="${size / 2}" transform="rotate(90 ${size / 2} ${size / 2})" text-anchor="middle" dominant-baseline="central" font-size="${size * 0.27}" font-weight="800" fill="#1E2430">${pct}</text>
+    <text x="${size / 2}" y="${size / 2}" transform="rotate(90 ${size / 2} ${size / 2})" text-anchor="middle" dominant-baseline="central" font-size="${size * 0.27}" font-weight="800" fill="#323232">${pct}</text>
   </svg>`;
     }
     function renderOverview() {
-      const ev = state.events, overall = avgProgress(ev);
+      const ev = state.events.filter(e => !isArchived(e)).filter(inDateRange), overall = avgProgress(ev);
       const byP = {}; state.projects.forEach(pp => byP[pp.name] = avgProgress(ev.filter(e => projectOf(e) === pp.name)));
       const done = ev.filter(e => +e.progress >= 100).length, ms = ev.filter(e => e.type === "jalon").length;
       let html = "";
-      html += `<div class="card ovc"><div class="ring">${ringSVG(overall, 58, "#B8923E")}</div>
+      html += `<div class="card ovc"><div class="ring">${ringSVG(overall, 58, "#552F91")}</div>
      <div><div class="lab">Avancement global</div><div class="big">${overall}<span style="font-size:14px">%</span></div>
      <div class="sm">${ev.length} éléments · ${done} terminés · ${ms} jalons</div></div></div>`;
       state.projects.map(pp => [pp.name, pp.name]).forEach(([k, lab]) => {
@@ -2451,12 +2535,20 @@
     }
 
     /* ---- Filter bar ---- */
+    const DATE_PRESETS = [["today", "Aujourd'hui"], ["week", "Cette semaine"], ["month", "Ce mois-ci"], ["30d", "30 derniers jours"], ["ytd", "Année en cours"], ["lastyear", "Année N-1"], ["custom", "Personnalisé"]];
     function renderFilterBar() {
-      const presets = [["", "Tout"], ["en-cours", "En cours"], ["bloque", "Bloqués"], ["retard", "En retard"], ["critique", "Chemin critique"]];
+      const presets = [["", "Tout"], ["en-cours", "En cours"], ["bloque", "Bloqués"], ["retard", "En retard"], ["critique", "Chemin critique"], ["archive", "Archivées"]];
       let html = `<div class="fb2">`;
       presets.forEach(([k, l]) => { html += `<button class="preset${state.preset === k ? " active" : ""}" data-preset="${k}">${l}</button>`; });
       state.projects.forEach(pp => { const on = state.filters.has(pp.name); html += `<button class="preset${on ? " active" : ""}" data-projfilter="${esc(pp.name)}"><span class="pdot" style="background:${pp.color}"></span>${esc(pp.short)}</button>`; });
       html += `<div class="fb-more"><input class="fb-search" id="fbSearch" placeholder="Rechercher…" value="${esc(state.search || "")}"><button class="preset" id="fbToggle">${state.filtersOpen ? "▴ Tags" : "▾ Tags"}</button></div></div>`;
+      const df = state.dateFilter;
+      html += `<div class="fb2" style="margin-top:8px"><span style="font-size:11.5px;font-weight:700;color:var(--faint);margin-right:2px">Période</span>`;
+      DATE_PRESETS.forEach(([k, l]) => { html += `<button class="preset dpreset${df.preset === k ? " active" : ""}" data-dpreset="${k}">${l}</button>`; });
+      if (df.preset) html += `<button class="preset" id="dfClear" title="Retirer le bornage">✕</button>
+      <span class="fb2" style="gap:4px"><button class="preset dfield${df.field === "start" ? " active" : ""}" data-dfield="start">Date de début</button><button class="preset dfield${df.field === "end" ? " active" : ""}" data-dfield="end">Date de fin</button></span>`;
+      if (df.preset === "custom") html += `<input type="date" class="qa-date" id="dfFrom" value="${df.from || ""}"><span class="muted">→</span><input type="date" class="qa-date" id="dfTo" value="${df.to || ""}">`;
+      html += `</div>`;
       if (state.filtersOpen) {
         const used = new Set(); state.events.forEach(e => (e.tags || []).forEach(t => used.add(t)));
         const known = allKnownTags();
@@ -2480,6 +2572,11 @@
       const ft = $("#fbToggle"); if (ft) ft.onclick = () => { state.filtersOpen = !state.filtersOpen; renderFilterBar(); };
       const se = $("#fbSearch"); if (se) se.oninput = () => { state.search = se.value; clearTimeout(se._t); se._t = setTimeout(() => renderView(), 200); };
       const cf = $("#clearFilters"); if (cf) cf.onclick = () => { state.filters.clear(); state.preset = ""; state.search = ""; renderAll(); };
+      $$("#filterbar .dpreset").forEach(b => b.onclick = () => { const k = b.dataset.dpreset; state.dateFilter.preset = state.dateFilter.preset === k ? "" : k; if (state.dateFilter.preset !== "custom") { state.dateFilter.from = ""; state.dateFilter.to = ""; } renderAll(); });
+      $$("#filterbar .dfield").forEach(b => b.onclick = () => { state.dateFilter.field = b.dataset.dfield; renderAll(); });
+      const dfC = $("#dfClear"); if (dfC) dfC.onclick = () => { state.dateFilter = { preset: "", field: "start", from: "", to: "" }; renderAll(); };
+      const dfFrom = $("#dfFrom"); if (dfFrom) dfFrom.onchange = () => { state.dateFilter.from = dfFrom.value; renderAll(); };
+      const dfTo = $("#dfTo"); if (dfTo) dfTo.onchange = () => { state.dateFilter.to = dfTo.value; renderAll(); };
     }
     function hexA(hex, a) { const h = hex.replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
 
@@ -2496,9 +2593,36 @@
           sl.onchange = () => { const e = state.events.find(x => x.id === id); if (e) { e.progress = +sl.value; e.updatedAt = Date.now(); recomputeParents(); persist(); renderOverview(); renderView(); } };
           sl.onclick = ev => ev.stopPropagation();
         }
+        const chk = r.querySelector(".rowchk");
+        if (chk) {
+          chk.onclick = ev => ev.stopPropagation();
+          chk.onchange = () => { if (chk.checked) state.selected.add(id); else state.selected.delete(id); r.classList.toggle("rowsel", chk.checked); updateBulkBar(); };
+        }
       });
     }
     function wireSections() { $$("#view .sec-h").forEach(h => h.onclick = () => { const k = h.dataset.sec; const cur = h.classList.contains("collapsed"); state.collapsed[k] = !cur; renderView(); }); }
+    function updateBulkBar() {
+      const bar = $("#bulkbar"); if (!bar) return;
+      const n = state.selected.size;
+      if (!n || READ_ONLY) { bar.hidden = true; bar.innerHTML = ""; return; }
+      bar.hidden = false;
+      bar.innerHTML = `<span class="bk-count">${n} sélectionnée${n > 1 ? "s" : ""}</span>
+    <select id="bkStatus"><option value="">Changer le statut…</option><option value="a-faire">À faire</option><option value="en-cours">En cours</option><option value="termine">Terminé</option><option value="bloque">Bloqué</option><option value="archive">Archivé</option></select>
+    <button class="bk-del" id="bkDel">Supprimer</button>
+    <button class="bk-cancel" id="bkCancel">Annuler</button>`;
+      $("#bkStatus").onchange = e => {
+        if (READ_ONLY) return; const v = e.target.value; if (!v) return;
+        state.events.forEach(ev => { if (state.selected.has(ev.id)) { ev.status = v; ev.updatedAt = Date.now(); } });
+        recomputeParents(); persist(); state.selected.clear(); renderAll(); updateBulkBar();
+      };
+      $("#bkDel").onclick = () => {
+        if (READ_ONLY) return;
+        if (!confirm(`Supprimer ${n} élément${n > 1 ? "s" : ""} ? Cette action est irréversible.`)) return;
+        state.events = state.events.filter(e => !state.selected.has(e.id));
+        state.selected.clear(); recomputeParents(); persist(); renderAll(); updateBulkBar();
+      };
+      $("#bkCancel").onclick = () => { state.selected.clear(); renderAll(); updateBulkBar(); };
+    }
 
     /* ---- Moteur de dépendances ---- */
     function evByTitle(t) { return state.events.find(x => x.title === t); }
@@ -2607,7 +2731,7 @@
     /* ---- Vue Kanban : colonnes par statut (+ swimlanes par projet) ---- */
     function renderKanban() {
       const list = visibleEvents();
-      const cols = [["a-faire", "À faire", "#64748B"], ["en-cours", "En cours", "#D97706"], ["bloque", "Bloqué", "#DC2626"], ["termine", "Terminé", "#16A34A"]];
+      const cols = [["a-faire", "À faire", "#64748B"], ["en-cours", "En cours", "#D97706"], ["bloque", "Bloqué", "#DC2626"], ["termine", "Terminé", "#16A34A"], ["archive", "Archivé", "#94A3B8"]];
       const card = e => {
         const pk = projectOf(e), col = projColor(pk); const tg = (e.tags || []).slice(0, 3).map(t => { const c = tagColor(t); return `<span class="minitag" style="background:${hexA(c, .13)};color:${c}">#${esc(t)}</span>`; }).join("");
         return `<div class="kb-card" data-id="${e.id}" style="border-left-color:${col}"><div class="kt">${esc(e.title)}</div><div class="km">${tg}<span class="pctlab" style="margin-left:auto">${effProgress(e)} %</span></div></div>`;
@@ -2759,6 +2883,11 @@
           sl.onchange = () => { const e = state.events.find(x => x.id === id); if (e) { e.progress = +sl.value; e.updatedAt = Date.now(); persist(); renderOverview(); } };
           sl.onclick = ev => ev.stopPropagation();
         }
+        const chk = r.querySelector(".rowchk");
+        if (chk) {
+          chk.onclick = ev => ev.stopPropagation();
+          chk.onchange = () => { if (chk.checked) state.selected.add(id); else state.selected.delete(id); r.classList.toggle("rowsel", chk.checked); updateBulkBar(); };
+        }
       });
     }
     function rowHTML(e, extraCls) {
@@ -2768,7 +2897,8 @@
       const tagsHtml = (e.tags || []).slice(0, 5).map(t => { const c = tagColor(t); return `<span class="minitag" style="background:${hexA(c, .13)};color:${c}">#${esc(t)}</span>`; }).join("");
       const st = statusOf(e), prog = isParent ? effProgress(e) : (+e.progress || 0);
       const ctrl = isParent ? `<div class="ctrl"><span class="mbar" style="width:120px"><i style="width:${prog}%"></i></span><span class="pctlab">${prog} %</span></div>` : `<div class="ctrl"><input type="range" class="slider" min="0" max="100" step="5" value="${prog}"><span class="pctlab">${prog} %</span></div>`;
-      return `<div class="row${isParent ? " parentrow" : ""}${extraCls ? " " + extraCls : ""}" data-id="${e.id}" style="border-left-color:${col}">
+      return `<div class="row${isParent ? " parentrow" : ""}${state.selected.has(e.id) ? " rowsel" : ""}${extraCls ? " " + extraCls : ""}" data-id="${e.id}" style="border-left-color:${col}">
+    <input type="checkbox" class="rowchk" data-id="${e.id}"${state.selected.has(e.id) ? " checked" : ""}>
     <div class="typ" title="${TYPE_LABEL[e.type]}" style="color:${col}">${TYPE_ICON[e.type]}</div>
     <div class="main" style="cursor:pointer">
       <div class="ttl">${esc(e.title)}${isParent ? ` <span style="font-size:11px;color:var(--faint);font-weight:600">(${kids.length} sous-tâches)</span>` : ""}</div>
@@ -2777,7 +2907,8 @@
     </div>
     ${ctrl}</div>`;
     }
-    const STATUSMAP = { "a-faire": { l: "À faire", c: "#64748B" }, "en-cours": { l: "En cours", c: "#D97706" }, "termine": { l: "Terminé", c: "#16A34A" }, "bloque": { l: "Bloqué", c: "#DC2626" } };
+    const STATUSMAP = { "a-faire": { l: "À faire", c: "#64748B" }, "en-cours": { l: "En cours", c: "#D97706" }, "termine": { l: "Terminé", c: "#16A34A" }, "bloque": { l: "Bloqué", c: "#DC2626" }, "archive": { l: "Archivé", c: "#94A3B8" } };
+    function isArchived(e) { return e.status === "archive"; }
     function statusKey(e) { if (e.status && STATUSMAP[e.status]) return e.status; if ((+e.progress || 0) >= 100) return "termine"; if ((e.tags || []).includes("Blocage")) return "bloque"; if ((+e.progress || 0) > 0) return "en-cours"; return "a-faire"; }
     function statusOf(e) {
       if (e.status && STATUSMAP[e.status]) return STATUSMAP[e.status];
@@ -2789,7 +2920,7 @@
       if (end < now) return { l: "En retard", c: "#DC2626" };
       return { l: "À démarrer", c: "#64748B" };
     }
-    function childrenOf(e) { return state.events.filter(x => x.parent === e.id); }
+    function childrenOf(e) { return state.events.filter(x => x.parent === e.id && !isArchived(x)); }
     function effProgress(e) { const c = childrenOf(e); if (c.length) return Math.round(c.reduce((s, x) => s + effProgress(x), 0) / c.length); return +e.progress || 0; }
     function recomputeParents() { state.events.forEach(e => { const k = childrenOf(e); if (k.length) e.progress = Math.round(k.reduce((s, x) => s + (+x.progress || 0), 0) / k.length); }); }
     function horizon(e) { const sk = statusKey(e); if (sk === "termine") return "done"; if (sk === "bloque") return "now"; const t = TODAY, sd = parseD(e.start), en = parseD(e.end || e.start); if ((+e.progress || 0) > 0) return "now"; if (en < t) return "now"; const d = daysBetween(t, sd); if (d <= 14) return "now"; if (d <= 45) return "next"; return "later"; }
@@ -2886,7 +3017,7 @@
         });
         const done = items.filter(e => +e.progress >= 100).length;
         cards += `<div class="card bcard"><div class="bh"><span class="bm">${monthLabel(k)}</span><span class="bc">${items.length} él. · ${done} ✓</span></div>
-      <div class="ringrow">${ringSVG(prog, 72, "#B8923E", 8)}<div class="legend">${legend}</div></div>
+      <div class="ringrow">${ringSVG(prog, 72, "#552F91", 8)}<div class="legend">${legend}</div></div>
       <div class="stackbar">${stack}</div></div>`;
       });
       $("#view").innerHTML = top + `<div class="bilan-grid">${cards}</div>`;
@@ -3032,7 +3163,7 @@
 
     /* ----------------------------- Init / events ----------------------------- */
     function wire() {
-      $$(".tab").forEach(t => t.onclick = () => { state.view = t.dataset.view; renderView(); $$(".tab").forEach(x => x.setAttribute("aria-selected", x === t)); });
+      $$(".tab").forEach(t => t.onclick = () => { state.view = t.dataset.view; state.selected.clear(); updateBulkBar(); renderView(); $$(".tab").forEach(x => x.setAttribute("aria-selected", x === t)); });
       $("#btnAdd").onclick = openAdd;
       // Quick-add + palette + statut
       const qa = $("#qa");
@@ -3157,7 +3288,7 @@
       state.tags.slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(t => {
         const opts = catOptionsHtml(t);
         const col = tagColor(t.name);
-        th += `<div class="mg-row" data-tag="${esc(t.name)}"><span class="mg-sq" style="background:${col}"></span><input class="mg-name mg-tname" value="${esc(t.name)}"><select class="mg-name mg-tproj" style="flex:0 0 auto;width:170px">${opts}</select><button class="mg-del mg-tdel">Supprimer</button></div>`;
+        th += `<div class="mg-row" data-tag="${esc(t.name)}"><input type="color" class="mg-color mg-tcolor" value="${col}"><input class="mg-name mg-tname" value="${esc(t.name)}"><select class="mg-name mg-tproj" style="flex:0 0 auto;width:170px">${opts}</select><button class="mg-del mg-tdel">Supprimer</button></div>`;
       });
       $("#mgTags").innerHTML = th || `<div class="muted" style="font-size:12.5px">Aucun tag.</div>`;
       $("#mgTProj").innerHTML = catOptionsHtml(null);
@@ -3170,6 +3301,7 @@
       $$("#mgTags .mg-row").forEach(row => {
         const nm = row.dataset.tag;
         row.querySelector(".mg-tname").onchange = e => { const nv = e.target.value.trim(); if (!nv) return; const t = state.tags.find(x => x.name === nm); if (t && nv !== nm) { renameTagEverywhere(t.name, nv); t.name = nv; } commitTax(true); };
+        row.querySelector(".mg-tcolor").onchange = e => { const t = state.tags.find(x => x.name === nm); if (t) t.color = e.target.value; commitTax(true); };
         row.querySelector(".mg-tproj").onchange = e => { const t = state.tags.find(x => x.name === nm); if (t) { const raw = e.target.value || ""; if (raw.startsWith("cat:")) { t.projectId = null; t.cat = raw.slice(4); if (!t.color) t.color = "#9A6A3A"; } else if (raw) { t.projectId = raw; t.color = null; t.cat = "sub"; } else { t.projectId = null; t.cat = "standalone"; if (!t.color) t.color = "#9A6A3A"; } } commitTax(true); };
         row.querySelector(".mg-tdel").onclick = () => { if (!confirm("Supprimer le tag « " + nm + " » ? Il sera retiré des événements.")) return; state.tags = state.tags.filter(x => x.name !== nm); state.events.forEach(ev => ev.tags = (ev.tags || []).filter(x => x !== nm)); commitTax(true); };
       });
@@ -3194,7 +3326,7 @@
       const ov = document.createElement("div");
       ov.id = "gateScrim";
       ov.style.cssText = "position:fixed;inset:0;z-index:200;background:#FAF8F3;display:flex;align-items:center;justify-content:center;padding:20px";
-      ov.innerHTML = '<div style="max-width:380px;width:100%;background:#fff;border:1px solid #E9E3D6;border-radius:16px;box-shadow:0 10px 40px rgba(30,36,48,.12);padding:28px;text-align:center"><div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#2A3140,#1E2430);color:#E9CF8E;display:grid;place-items:center;font-weight:800;font-size:18px;margin:0 auto 14px">' + APP_LOGO + '</div><h2 style="font-size:18px;margin:0 0 5px;color:#1E2430">' + APP_TITLE + '</h2><div style="font-size:13px;color:#6B7280;margin-bottom:18px">Acc\u00e8s r\u00e9serv\u00e9. Entre le code d\'acc\u00e8s.</div><input id="gateInput" type="password" placeholder="Code d\'acc\u00e8s" autocomplete="off" style="width:100%;height:42px;padding:0 14px;border:1px solid #E9E3D6;border-radius:10px;background:#FCFBF8;font-size:15px;text-align:center;letter-spacing:.03em;color:#1E2430"><div id="gateErr" style="color:#DC2626;font-size:12.5px;height:16px;margin:8px 0"></div><button id="gateBtn" style="width:100%;height:42px;border:none;border-radius:10px;background:linear-gradient(180deg,#C8A24A,#B8923E);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Entrer</button><label style="display:flex;align-items:center;gap:7px;justify-content:center;margin-top:13px;font-size:12px;color:#6B7280;cursor:pointer"><input type="checkbox" id="gateRemember" checked> Se souvenir sur cet appareil</label></div>';
+      ov.innerHTML = '<div style="max-width:380px;width:100%;background:#fff;border:1px solid #E9E3D6;border-radius:16px;box-shadow:0 10px 40px rgba(50,50,50,.12);padding:28px;text-align:center"><div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#6C4EA2,#552F91);color:#FFFFFF;display:grid;place-items:center;font-weight:800;font-size:18px;margin:0 auto 14px">' + APP_LOGO + '</div><h2 style="font-size:18px;margin:0 0 5px;color:#323232">' + APP_TITLE + '</h2><div style="font-size:13px;color:#6B7280;margin-bottom:18px">Acc\u00e8s r\u00e9serv\u00e9. Entre le code d\'acc\u00e8s.</div><input id="gateInput" type="password" placeholder="Code d\'acc\u00e8s" autocomplete="off" style="width:100%;height:42px;padding:0 14px;border:1px solid #E9E3D6;border-radius:10px;background:#FCFBF8;font-size:15px;text-align:center;letter-spacing:.03em;color:#323232"><div id="gateErr" style="color:#DC2626;font-size:12.5px;height:16px;margin:8px 0"></div><button id="gateBtn" style="width:100%;height:42px;border:none;border-radius:10px;background:linear-gradient(180deg,#6C4EA2,#552F91);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Entrer</button><label style="display:flex;align-items:center;gap:7px;justify-content:center;margin-top:13px;font-size:12px;color:#6B7280;cursor:pointer"><input type="checkbox" id="gateRemember" checked> Se souvenir sur cet appareil</label></div>';
       document.body.appendChild(ov);
       const inp = ov.querySelector("#gateInput"), btn = ov.querySelector("#gateBtn"), err = ov.querySelector("#gateErr");
       function submit() { const v = inp.value.trim(); if (checkCode(v)) { ACCESS_CODE = v; if (ov.querySelector("#gateRemember").checked) localStorage.setItem("suivi_access_code", v); ov.remove(); start(); } else { err.textContent = "Code incorrect."; inp.value = ""; inp.focus(); } }
